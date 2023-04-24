@@ -5,8 +5,9 @@ import java.util.concurrent.Semaphore;
 
 class OSMidterm {
     //Initialize the semaphores you need
-    private static Semaphore semaphoreConcatenation = new Semaphore(1);
-    private static Semaphore semaphoreRow = new Semaphore(0);
+    //
+    private static Semaphore semaphoreConcatenation = new Semaphore(1); //The semaphoreConcatenation semaphore is used to ensure that only one thread at a time can access the critical section where the concatenation of the rows is performed (staticResource).
+    private static Semaphore semaphoreRow = new Semaphore(0); //The semaphoreRow semaphore is used to keep track of the number of rows that have been processed so far. It starts with 0 permits, meaning that no rows have been processed yet.
 
     private static int whichRowCounter = 0;
     public static void main(String[] args) throws InterruptedException {
@@ -45,7 +46,7 @@ class OSMidterm {
         //endregion
 
 
-//        // Run the threads from the Concatenation class
+        // Run the threads from the Concatenation class
         Concatenation[] threads = new Concatenation[m];
         for (int i = 0; i < m; i++) {
             threads[i] = new Concatenation(matrix, statisticsResource);
@@ -87,17 +88,17 @@ class OSMidterm {
 
         public void concatenate_by_row(){
             try {
-                semaphoreConcatenation.acquire();
-                StringBuilder concatenatedRow = new StringBuilder();
-                Object[] row = matrix.getRow(whichRowCounter++);
-                for (int j = 0; j < row.length; j++) {
-                    Object element = row[j];
-                    if (element instanceof Character) {
-                        concatenatedRow.append(element);
+                semaphoreConcatenation.acquire(); //It first acquires the semaphoreConcatenation semaphore, which ensures that only one thread at a time is accessing the matrix object.
+                StringBuilder concatenatedRow = new StringBuilder(); //It then creates a new StringBuilder object to hold the concatenated row.
+                Object[] row = matrix.getRow(whichRowCounter++); //It gets the next row of the matrix by calling matrix.getRow(whichRowCounter++), where whichRowCounter is a counter that keeps track of which row each thread should access.
+                for (int j = 0; j < row.length; j++) { //It then iterates over the elements in the row,
+                    Object element = row[j]; //Getting the element from each column in the row
+                    if (element instanceof Character) { //Checking if each element is a Character.
+                        concatenatedRow.append(element); //If it is, it appends it to the concatenatedRow StringBuilder.
                     }
                 }
-                statisticsResource.concatenateString(concatenatedRow.toString());
-                semaphoreRow.release();
+                statisticsResource.concatenateString(concatenatedRow.toString()); //It adds the concatenatedRow to the statisticsResource
+                semaphoreRow.release(); //It then releases the semaphoreRow semaphore, which signals to the main thread that it can continue executing.
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -106,9 +107,9 @@ class OSMidterm {
         public void execute() throws InterruptedException{
             //call the concatenate_by_row() function
             try {
-                concatenate_by_row();
-                semaphoreRow.acquire();
-                semaphoreConcatenation.release();
+                concatenate_by_row(); //It calls concatenate_by_row() to concatenate a single row of the matrix.
+                semaphoreRow.acquire(); //It then acquires the semaphoreRow semaphore, which ensures that the main thread doesn't continue until the current row has been fully concatenated and added to statisticsResource.
+                semaphoreConcatenation.release(); //It releases the semaphoreConcatenation semaphore, which allows the next thread to access the matrix object.
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

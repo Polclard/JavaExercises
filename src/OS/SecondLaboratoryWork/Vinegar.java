@@ -1,13 +1,7 @@
 package OS.SecondLaboratoryWork;
 
-import java.sql.Time;
-import java.util.ArrayList;
 import java.util.HashSet;
-
-import java.util.List;
-import java.util.Timer;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
 
 
 public class Vinegar {
@@ -29,16 +23,16 @@ public class Vinegar {
 
     public static void init()
     {
-        C = new Semaphore(2);
-        H = new Semaphore(4);
-        O = new Semaphore(2);
+        C = new Semaphore(2); //Two atoms of Carbon
+        H = new Semaphore(4); //Four atoms of Hydrogen
+        O = new Semaphore(2); //Two atoms of Oxygen
 
 
-        canBond = new Semaphore(0);
-        finish = new Semaphore(0);
+        canBond = new Semaphore(0); //At first zero
+        finish = new Semaphore(0); //At first zero
 
-        lock = new Semaphore(1);
-        totalNumOfAtoms = 0;
+        lock = new Semaphore(1); //Lock is always one for locking the shared variable totalNumOfAtoms
+        totalNumOfAtoms = 0; //Shared counter
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -70,7 +64,6 @@ public class Vinegar {
 
 
         // after all of them are started, wait each of them to finish for maximum 2_000 ms
-
         for(Thread thread : threads)
         {
             try{
@@ -82,7 +75,14 @@ public class Vinegar {
             }
         }
         // for each thread, terminate it if it is not finished
-        // System.out.println("Possible deadlock!");
+        for(Thread thread : threads)
+        {
+           if(thread.isAlive())
+           {
+               thread.interrupt();
+               System.out.println("Possible deadlock!");
+           }
+        }
     }
 
 
@@ -104,16 +104,16 @@ public class Vinegar {
 
             // at most 2 atoms should print this in parallel
 
-            C.acquire();
-            System.out.println("C here.");
-            lock.acquire();
-            totalNumOfAtoms++;
-            if(totalNumOfAtoms == 2)
+            C.acquire(); //We are acquiring permit from one of C Semaphore (atoms)
+            System.out.println("C here."); //When we get the permit (atom) we say C is here
+            lock.acquire(); //The we are locking (acquiring) the shared counter, preventing it from unauthorized changes
+            totalNumOfAtoms++; //We are incrementing the totalNumOfAtoms which like the name says gives us the total number of atoms
+            if(totalNumOfAtoms == 2) // We need two atoms from Carbon so if we get them
             {
-                okay = true;
-                canBond.release(8);
+                okay = true; //We set the okay boolean to true
+                canBond.release(8); // and we release permit to every other 2+4+2
             }
-            lock.release();
+            lock.release(); //We are releasing the lock as well for the totalNumOfAtoms
 
 
             // after all atoms are present, they should start with the bonding process together
@@ -122,28 +122,34 @@ public class Vinegar {
 
 //            Thread.sleep(100);// this represents the bonding process
 
-            lock.acquire();
-            totalNumOfAtoms--;
-            if(totalNumOfAtoms == 0)
+            lock.acquire();//We are locking (acquiring) the shared counter, preventing it from unauthorized changes
+            totalNumOfAtoms--; //We are decrementing the totalNumOfAtoms which like the name says gives us the total number of atoms
+            if(totalNumOfAtoms == 0) //If there are no more atoms that means they've all bonded successfully
             {
-                finish.release(8);
+                finish.release(8);//We can release them, so finish.release() is called
             }
-            lock.release();
+            lock.release();//We are releasing the lock as well for the totalNumOfAtoms
 
+            finish.acquire(); //If the totalNumOfAtoms is not 0, we acquire a permit to finish for every atom
+            System.out.println("C done."); //At the end all of them are bonded, finished, so we print "C done."
+
+
+
+            /*
+                This code block handles the creation
+                of a molecule once all the atoms
+                required for bonding are present.
+            */
             finish.acquire();
-            System.out.println("C done.");
-
-
-            finish.acquire();
-            if(okay)
+            if(okay) //If okay is true
             {
                 okay = false;
-                totalN++;
-                // only one atom should print the next line, representing that the molecule is created
-                System.out.println("Molecule created.");
+                totalN++;//The totalN counter is incremented to keep track of the number of molecules that have been created.
+                // Only one atom should print the next line, representing that the molecule is created
+                System.out.println("Molecule created."); //Only one atoms prints this because for every other atom the okay is false
             }
-            lock.release();
-            C.release();
+            lock.release();//We are releasing the lock as well for the totalNumOfAtoms
+            C.release(); //We are releasing the atom because we don't longer need it
         }
 
     }
