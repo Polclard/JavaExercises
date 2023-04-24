@@ -1,4 +1,4 @@
-package OS.SecondLaboratoryWork;
+package OS;
 
 import java.util.HashSet;
 import java.util.concurrent.Semaphore;
