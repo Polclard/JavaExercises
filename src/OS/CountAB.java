@@ -31,15 +31,10 @@ public class CountAB {
     class CounterA extends Thread {
 
         public void count(char[] data) throws InterruptedException {
-            // da se implementira
-            int brojacA=0;
             for (char datum : data) {
-                System.out.println(datum);
                 if (datum == 'A') {
                     semaforA.acquire();
-
                     countA++;
-                    System.out.println(countA);
                     semaforA.release();
                 }
             }
@@ -64,15 +59,10 @@ public class CountAB {
     class CounterB extends Thread {
 
         public void count(char[] data) throws InterruptedException {
-            // da se implementira
-            int brojacB=0;
             for (char datum : data) {
-                System.out.println(datum);
                 if (datum == 'B') {
-
                     semaforB.acquire();
                     countB++;
-                    System.out.println(countB);
                     semaforB.release();
                 }
             }
@@ -136,7 +126,10 @@ public class CountAB {
         for (Thread t : threads) {
             t.join();
         }
-        System.out.print(countA+"-"+countB);
+
+        average = (countA + countB) / ((double)total * (double)NUM_RUNS * 2);
+
+        System.out.println(countA+"-"+countB);
         System.out.println(average);
 
         //ANCO JA RESI SO TOA SO NE JA RESI GG

@@ -14,18 +14,13 @@ public class SemaphoreClass {
                 throw new RuntimeException(e);
             }
             try {
-                A();
+                C();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             B();
             try {
-                C();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            try {
-                C();
+                A();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -39,7 +34,7 @@ public class SemaphoreClass {
         @Override
         public void run() {
             try {
-                A();
+                C();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -49,11 +44,6 @@ public class SemaphoreClass {
                 throw new RuntimeException(e);
             }
             B();
-            try {
-                C();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
             try {
                 C();
             } catch (InterruptedException e) {
@@ -64,7 +54,7 @@ public class SemaphoreClass {
         }
     }
 
-    static Semaphore semaphore = new Semaphore(5);
+    static Semaphore semaphore = new Semaphore(4); //TODO
     static void A() throws InterruptedException {
         semaphore.acquire();
         System.out.println("A");
@@ -79,12 +69,17 @@ public class SemaphoreClass {
         System.out.println("C");
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Thread1 thread1 = new Thread1();
         Thread2 thread2 = new Thread2();
 
         thread1.start();
         thread2.start();
+
+        thread1.join();
+        thread2.join();
+
+        System.out.println(semaphore.availablePermits());
 
     }
 
