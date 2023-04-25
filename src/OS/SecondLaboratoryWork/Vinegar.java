@@ -108,7 +108,7 @@ public class Vinegar {
             System.out.println("C here."); //When we get the permit (atom) we say C is here
             lock.acquire(); //The we are locking (acquiring) the shared counter, preventing it from unauthorized changes
             totalNumOfAtoms++; //We are incrementing the totalNumOfAtoms which like the name says gives us the total number of atoms
-            if(totalNumOfAtoms == 2) // We need two atoms from Carbon so if we get them
+            if(totalNumOfAtoms == 8) // We need two atoms from Carbon so if we get them
             {
                 okay = true; //We set the okay boolean to true
                 canBond.release(8); // and we release permit to every other 2+4+2
@@ -177,7 +177,7 @@ public class Vinegar {
             System.out.println("H here.");
             lock.acquire();
             totalNumOfAtoms++;
-            if(totalNumOfAtoms == 4)
+            if(totalNumOfAtoms == 8)
             {
                 okay = true;
                 canBond.release(8);
@@ -238,7 +238,7 @@ public class Vinegar {
             System.out.println("O here.");
             lock.acquire();
             totalNumOfAtoms++;
-            if(totalNumOfAtoms == 2)
+            if(totalNumOfAtoms == 8)
             {
                 okay = true;
                 canBond.release(8);
